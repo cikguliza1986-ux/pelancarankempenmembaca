@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIMIK PELANCARAN KEMPEN GALAKAN MEMBACA 2026</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neon: {
+                            blue: '#00f3ff',
+                            green: '#39ff14',
+                            dark: '#00050a'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'neon-blue': '0 0 20px rgba(0, 243, 255, 0.6)',
+                        'neon-blue-intense': '0 0 30px rgba(0, 243, 255, 0.9)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #00050a;
+            overflow: hidden;
+        }
+
+        /* Background grid and gradient */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+        }
+
+        /* Scanline effect */
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+            background-size: 100% 4px; z-index: 10; pointer-events: none; opacity: 0.6;
+        }
+
+        /* HUD Corners */
+        .corner { position: absolute; width: 40px; height: 40px; border: 3px solid #00f3ff; transition: all 0.3s ease; }
+        .tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* Button Clip Path */
+        .cyber-btn {
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        /* Animations */
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotate-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes blinker { 50% { opacity: 0.2; } }
+        @keyframes shakeEffect { 
+            0% { transform: translate(1px, 1px) rotate(0deg); } 
+            25% { transform: translate(-2px, -2px) rotate(-1deg); } 
+            50% { transform: translate(2px, -1px) rotate(1deg); } 
+            75% { transform: translate(-1px, 2px) rotate(0deg); } 
+            100% { transform: translate(1px, -2px) rotate(-1deg); } 
+        }
+
+        .animate-zoomIn { animation: zoomIn 1s cubic-bezier(0.17, 0.88, 0.32, 1.28) forwards; }
+        .animate-blink { animation: blinker 1s steps(2, start) infinite; }
+        .animate-shake { animation: shakeEffect 0.2s infinite; }
+        
+        .ring-outer { animation: rotate 10s linear infinite; }
+        .ring-inner { animation: rotate-reverse 6s linear infinite; }
+
+        /* Module Cards Reveal Delay */
+        .module-card { opacity: 0; }
+        
+        /* Word Reveal Animations */
+        .word-reveal {
+            opacity: 0;
+            display: inline-block;
+            transform: scale(1.2) translateY(15px);
+            filter: blur(4px);
+            animation: textRevealAnim 0.6s cubic-bezier(0.17, 0.88, 0.32, 1.28) forwards;
+        }
+        @keyframes textRevealAnim {
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+        .auto-type { opacity: 0; }
+    </style>
+</head>
+<body class="text-neon-blue font-rajdhani flex items-center justify-center">
+
+    <audio id="audio-player" loop preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="gimmick-container" class="relative w-full h-full flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,_#001a33_0%,_#00050a_100%)] bg-grid">
+        <div class="scanlines"></div>
+        
+        <!-- HUD Frame Decor -->
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+        </div>
+
+        <!-- Setup Screen -->
+        <div id="setup-box" class="z-20 p-10 border border-neon-blue bg-neon-dark/90 shadow-neon-blue text-center backdrop-blur-sm max-w-lg w-[90%] transition-opacity duration-500">
+            <img src="https://i.postimg.cc/NyQB6Jsc/Logo.png" alt="Logo" class="h-20 mx-auto mb-6 filter drop-shadow-[0_0_10px_rgba(0,243,255,0.8)]">
+            <h2 class="font-orbitron tracking-[0.2em] text-2xl mb-2 text-white">SECURITY OVERRIDE</h2>
+            <p class="font-orbitron text-neon-blue mb-8 tracking-widest text-sm">AUTHORIZED: ENCIK SYAHRIZAL BIN DRUS@ADRUS</p>
+            
+            <button onclick="startGimmick()" class="cyber-btn bg-neon-blue text-black font-orbitron font-black py-4 px-12 text-lg hover:bg-white hover:shadow-neon-blue-intense hover:scale-105 transition-all duration-300">
+                AKTIFKAN SISTEM
+            </button>
+            
+            <p class="text-xs mt-6 opacity-50 tracking-widest uppercase">Tekan F11 untuk Mod Skrin Penuh</p>
+        </div>
+
+        <!-- Lock & Percentage Screen -->
+        <div id="lock-screen" class="hidden flex-col items-center z-20">
+            <div class="relative w-56 h-56 flex items-center justify-center mb-4">
+                <!-- SVG Progress Rings -->
+                <svg class="absolute inset-0 w-full h-full ring-outer opacity-50">
+                    <circle cx="112" cy="112" r="108" stroke="#00f3ff" stroke-width="2" stroke-dasharray="20 10" fill="transparent" />
+                </svg>
+                <svg class="absolute inset-0 w-full h-full ring-inner opacity-70">
+                    <circle cx="112" cy="112" r="95" stroke="#39ff14" stroke-width="1" stroke-dasharray="10 30" fill="transparent" />
+                </svg>
+                <svg class="absolute inset-0 w-full h-full transform -rotate-90">
+                    <circle cx="112" cy="112" r="80" stroke="rgba(0, 243, 255, 0.2)" stroke-width="6" fill="transparent" />
+                    <!-- Circumference = 2 * pi * 80 = 502.6 -->
+                    <circle id="progress-ring" cx="112" cy="112" r="80" stroke="#00f3ff" stroke-width="6" fill="transparent" stroke-dasharray="502.6" stroke-dashoffset="502.6" class="transition-all duration-100 ease-linear shadow-neon-blue" />
+                </svg>
+                
+                <div id="lock-icon" class="text-5xl drop-shadow-[0_0_15px_rgba(0,243,255,1)]">🔒</div>
+            </div>
+
+            <div class="font-orbitron text-6xl text-white font-bold tracking-wider drop-shadow-[0_0_20px_rgba(0,243,255,0.8)] mb-6" id="perc-val">0%</div>
+            
+            <div class="w-80 max-w-[90vw] h-3 border border-neon-blue p-[2px] bg-neon-blue/10">
+                <div id="system-bar" class="h-full w-0 bg-neon-blue shadow-neon-blue transition-all duration-100 ease-linear"></div>
+            </div>
+            
+            <h3 id="sys-status" class="font-orbitron mt-6 text-sm tracking-[0.3em] uppercase text-neon-blue animate-pulse">
+                Menghubungkan Portal...
+            </h3>
+        </div>
+
+        <!-- Fasa 1: Paparan Perasmian -->
+        <div id="officiation-screen" class="hidden flex-col items-center justify-center w-full h-full max-w-6xl p-6 z-20 text-center transition-opacity duration-1000">
+            <img src="https://i.postimg.cc/NyQB6Jsc/Logo.png" alt="Logo" class="h-24 md:h-32 mb-6 filter drop-shadow-[0_0_20px_rgba(0,243,255,0.8)] animate-zoomIn">
+            
+            <div class="w-full mb-8">
+                <h1 id="title-text" class="auto-type font-orbitron text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-[0.2em] md:tracking-[0.3em] drop-shadow-[0_0_20px_rgba(0,243,255,0.6)] uppercase leading-tight">
+                    Kempen Galakan Membaca 2026
+                </h1>
+            </div>
+
+            <div id="vip-box" class="w-full max-w-4xl py-8 border-y-2 border-neon-blue/50 bg-neon-blue/5 flex flex-col items-center opacity-0 transition-opacity duration-1000 backdrop-blur-sm">
+                <p id="vip-label" class="auto-type tracking-[0.4em] text-sm md:text-base text-neon-blue mb-2 font-bold">DIRASMIKAN OLEH:</p>
+                <h2 id="vip-name" class="auto-type font-orbitron text-3xl md:text-5xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] mb-3 text-center">
+                    ENCIK SYAHRIZAL BIN DRUS@ADRUS
+                </h2>
+                <p id="vip-title" class="auto-type text-base md:text-xl text-white tracking-[0.2em] font-light text-center">
+                    PENOLONG KANAN HEM 
+		    KOLEJ TUN DATU TUANKU HAJI BUJANG
+                </p>
+            </div>
+        </div>
+
+        <!-- Fasa 2: Paparan Modul -->
+        <div id="modules-screen" class="hidden flex-col items-center justify-center w-full h-full max-w-6xl p-6 z-20 text-center transition-opacity duration-1000 opacity-0">
+            <h2 id="mod-title" class="auto-type font-orbitron text-3xl md:text-5xl font-bold text-white drop-shadow-[0_0_15px_rgba(0,243,255,0.8)] mb-12 tracking-[0.2em] uppercase">
+                KEMPEN GALAKAN MEMBACA 2026
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+                <div class="module-card border border-neon-blue/40 bg-neon-blue/10 p-6 backdrop-blur-sm hover:bg-neon-blue/20 transition-colors opacity-0 [animation-fill-mode:forwards]">
+                    <small class="font-orbitron text-neon-green tracking-widest text-xs">MODUL 01</small>
+                    <p class="text-xl font-bold text-white mt-2 tracking-wider">JOM ISI AINS</p>
+                </div>
+                <div class="module-card border border-neon-blue/40 bg-neon-blue/10 p-6 backdrop-blur-sm hover:bg-neon-blue/20 transition-colors opacity-0 [animation-fill-mode:forwards]">
+                    <small class="font-orbitron text-neon-green tracking-widest text-xs">MODUL 02</small>
+                    <p class="text-xl font-bold text-white mt-2 tracking-wider">PEMBACA TERBANYAK</p>
+                </div>
+                <div class="module-card border border-neon-blue/40 bg-neon-blue/10 p-6 backdrop-blur-sm hover:bg-neon-blue/20 transition-colors opacity-0 [animation-fill-mode:forwards]">
+                    <small class="font-orbitron text-neon-green tracking-widest text-xs">MODUL 03</small>
+                    <p class="text-xl font-bold text-white mt-2 tracking-wider">PEMINJAM TERBANYAK</p>
+                </div>
+            </div>
+
+            <div class="font-orbitron tracking-[0.3em] text-xs md:text-sm text-neon-green mt-16 animate-blink border border-neon-green/30 px-6 py-2 rounded-full bg-neon-green/5">
+                ● SYSTEM STATUS : ONLINE / PORTAL OPENED ●
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk animasi teks perkataan demi perkataan
+        function animateText(elementId, delayBase = 0, speed = 300) {
+            const el = document.getElementById(elementId);
+            if(!el) return 0;
+            const text = el.getAttribute('data-text') || el.innerText;
+            el.setAttribute('data-text', text); 
+            el.innerHTML = '';
+            el.style.opacity = '1';
+            
+            // Guna split space tapi pastikan ia kemas
+            const words = text.trim().split(/\s+/);
+            let maxTime = 0;
+
+            words.forEach((word, index) => {
+                const span = document.createElement('span');
+                span.innerHTML = word + '&nbsp;';
+                span.className = 'word-reveal';
+                
+                const delay = delayBase + (index * (speed / 1000));
+                span.style.animationDelay = `${delay}s`;
+                
+                el.appendChild(span);
+                maxTime = delay * 1000 + 600; // 600ms anggaran masa animasi tamat
+            });
+            
+            return maxTime; 
+        }
+
+        // Fungsi Automatik Transisi Berurutan
+        function startAutoSequence() {
+            const officiationScreen = document.getElementById('officiation-screen');
+            officiationScreen.classList.remove('hidden');
+            officiationScreen.classList.add('flex');
+            
+            setTimeout(() => {
+                // 1. Animasi Tajuk Utama (Perkataan demi perkataan)
+                const t1 = animateText('title-text', 0, 400); 
+                
+                setTimeout(() => {
+                    // 2. Tunjuk Kotak VIP dan Animasi Teks VIP
+                    document.getElementById('vip-box').style.opacity = '1';
+                    
+                    animateText('vip-label', 0, 200);
+                    animateText('vip-name', 0.5, 400);
+                    const t2 = animateText('vip-title', 1.5, 300);
+                    
+                    // 3. Transisi Auto ke Modul selepas tempoh bertenang (7 saat membaca)
+                    setTimeout(() => {
+                        transitionToModules();
+                    }, t2 + 7000); 
+                    
+                }, t1 + 300); 
+                
+            }, 1000); // Mula selepas logo muncul
+        }
+
+        function transitionToModules() {
+            const officiationScreen = document.getElementById('officiation-screen');
+            const modulesScreen = document.getElementById('modules-screen');
+            
+            // Pudar keluar skrin perasmian
+            officiationScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                officiationScreen.classList.remove('flex');
+                officiationScreen.classList.add('hidden');
+                
+                modulesScreen.classList.remove('hidden');
+                modulesScreen.classList.add('flex');
+                
+                setTimeout(() => {
+                    modulesScreen.style.opacity = '1';
+                    
+                    // 4. Animasi Tajuk Modul (Perkataan demi perkataan)
+                    const t1 = animateText('mod-title', 0, 400);
+                    
+                    setTimeout(() => {
+                        // 5. Papar kotak modul berurutan
+                        document.querySelectorAll('.module-card').forEach((card, index) => {
+                            card.style.animationDelay = `${index * 0.3}s`;
+                            card.classList.add('animate-zoomIn');
+                        });
+                    }, t1 + 300);
+                    
+                }, 50);
+            }, 1000);
+        }
+
+        function startGimmick() {
+            // Audio setup
+            const audio = document.getElementById('audio-player');
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio play prevented by browser policy:", e));
+
+            // UI Transitions
+            const setupBox = document.getElementById('setup-box');
+            const lockScreen = document.getElementById('lock-screen');
+            const container = document.getElementById('gimmick-container');
+            
+            setupBox.style.opacity = '0';
+            setTimeout(() => {
+                setupBox.style.display = 'none';
+                lockScreen.classList.remove('hidden');
+                lockScreen.classList.add('flex');
+                runUnlockSequence(audio, lockScreen, container);
+            }, 500);
+        }
+
+        function runUnlockSequence(audio, lockScreen, container) {
+            let progress = 0;
+            const bar = document.getElementById('system-bar');
+            const percText = document.getElementById('perc-val');
+            const sysStatus = document.getElementById('sys-status');
+            const lockIcon = document.getElementById('lock-icon');
+            const progressRing = document.getElementById('progress-ring');
+            
+            // Maximum dash offset for the SVG ring
+            const maxDashOffset = 502.6; 
+
+            const interval = setInterval(() => {
+                // Easing the progress slightly for realism
+                const increment = Math.random() > 0.3 ? 1 : 2;
+                progress += increment;
+                if (progress > 100) progress = 100;
+
+                // Update UI elements
+                bar.style.width = progress + "%";
+                percText.innerText = progress + "%";
+                
+                // Update SVG ring
+                const offset = maxDashOffset - ((progress / 100) * maxDashOffset);
+                progressRing.style.strokeDashoffset = offset;
+
+                // Status updates based on progress milestones
+                if (progress === 30) {
+                    sysStatus.innerText = "MENYEMAK AKSES BIOMETRIK...";
+                } else if (progress === 60) {
+                    sysStatus.innerText = "MENGECAM IDENTITI PERASMI...";
+                } else if (progress === 85) {
+                    sysStatus.innerText = "MENYEDIAKAN TRANSMISI AKHIR...";
+                    container.classList.add('animate-shake');
+                    sysStatus.classList.remove('text-neon-blue');
+                    sysStatus.classList.add('text-red-500'); // Warning color
+                }
+
+                // Sequence Complete
+                if (progress === 100) {
+                    clearInterval(interval);
+                    
+                    audio.volume = 1.0;
+                    lockIcon.innerText = "🔓";
+                    lockIcon.classList.remove('drop-shadow-[0_0_15px_rgba(0,243,255,1)]');
+                    lockIcon.classList.add('drop-shadow-[0_0_15px_rgba(57,255,20,1)]');
+                    
+                    progressRing.style.stroke = "#39ff14"; // Turn ring green
+                    
+                    sysStatus.innerText = "PENGESAHAN BERJAYA!";
+                    sysStatus.classList.remove('text-red-500', 'animate-pulse');
+                    sysStatus.classList.add('text-neon-green');
+
+                    // Transition to final screen automatically
+                    setTimeout(() => {
+                        container.classList.remove('animate-shake');
+                        lockScreen.classList.remove('flex');
+                        lockScreen.classList.add('hidden');
+                        
+                        // Mula sequence automatik (teks dikeluarkan satu persatu)
+                        startAutoSequence();
+                    }, 1500);
+                }
+            }, 60); // Speed of the progress (approx 6 seconds total)
+        }
+    </script>
+</body>
+</html>
